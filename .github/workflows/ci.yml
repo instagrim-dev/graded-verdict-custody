@@ -1,0 +1,25 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Conformance fixtures (reference runner)
+        run: python3 conformance/runner.py
+      - name: Prose <-> registration parity (producer self-consistency)
+        run: python3 scripts/check_prose_registration_parity.py
+      - name: Publication boundary (no private-provenance residue)
+        run: python3 scripts/check_publication_boundary.py
+      - name: Publication boundary polarity (gate can go red)
+        run: python3 scripts/check_publication_boundary.py --self-test
+      - name: Release builder red path (failing gate mints no record)
+        run: python3 scripts/test_release_builder_red_path.py

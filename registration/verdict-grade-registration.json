@@ -1,0 +1,12 @@
+{
+  "schema_version": "verdict-grade-registration/v1",
+  "producer": "instagrim-dev/graded-verdict-custody",
+  "ordered_grades": [
+    "proof",
+    "known_answer",
+    "interop",
+    "constructed_check",
+    "review_only",
+    "unverified"
+  ]
+}

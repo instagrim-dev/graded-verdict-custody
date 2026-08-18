@@ -1,0 +1,492 @@
+{
+  "schema": "gvc-derivation-cases/v1",
+  "source": "Authored from spec/graded-verdict-custody.md sections 5-7. Not exported from any implementation's test suite.",
+  "cases": [
+    {
+      "name": "no_declared_oracles_yields_unverified",
+      "input": {
+        "declared": [],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": ""
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "unverified",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "unrun_declared_cap_fires",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"},
+          {"tier": "constructed_check", "ran": false, "passed": false, "author": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"}, "content_identity": ""}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "interop",
+        "applied_rank_ops": ["unrun_declared_cap"],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 1, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "unrun_declared_cap_does_not_fire_when_all_ran",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "same_chain_cap_fires_for_same_chain_agent_author",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "interop",
+        "applied_rank_ops": ["same_chain_cap"],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 1, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "same_chain_cap_exempts_kernel_proof",
+      "input": {
+        "declared": [
+          {"tier": "proof", "ran": true, "passed": true, "author": {"identity": "lean-kernel-4", "kind": "kernel", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "proof",
+        "evidence_kind": "proof",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"proof_kernel_exempt": 1}
+      }
+    },
+    {
+      "name": "agent_authored_proof_same_chain_capped",
+      "input": {
+        "declared": [
+          {"tier": "proof", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "proof",
+        "applied_rank_ops": ["same_chain_cap"],
+        "conflicting_evidence": false,
+        "counters": {"degraded": 1, "proof_kernel_exempt": 0}
+      }
+    },
+    {
+      "name": "same_chain_cap_does_not_fire_across_chains",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-9", "kind": "agent", "chain_id": "chain-2"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "interop",
+        "evidence_kind": "interop",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "same_chain_indeterminate_is_counted_not_assumed",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": ""},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "interop",
+        "evidence_kind": "interop",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"same_chain_indeterminate": 1, "author_chain_unbound": 0}
+      }
+    },
+    {
+      "name": "author_chain_unbound_counted_distinctly",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "interop",
+        "evidence_kind": "interop",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"author_chain_unbound": 1, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "human_author_same_chain_caps",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "interop",
+        "applied_rank_ops": ["same_chain_cap"],
+        "conflicting_evidence": false,
+        "counters": {"degraded": 1}
+      }
+    },
+    {
+      "name": "conflict_demotion_fires_one_ordinal_tier",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "runner": {"identity": "ci-executor-1", "kind": "kernel", "chain_id": "ci-chain-1"}, "content_identity": "sha:a"},
+          {"tier": "constructed_check", "ran": true, "passed": false, "author": {"identity": "operator-2", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "review_only",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": ["conflict_demotion"],
+        "conflicting_evidence": true,
+        "failed_declared_evidence": true,
+        "oracle_author": {"identity": "operator-1", "kind": "human", "chain_id": ""},
+        "oracle_runner": {"identity": "ci-executor-1", "kind": "kernel", "chain_id": "ci-chain-1"},
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "counters": {"degraded": 1, "failed_declared": 1}
+      }
+    },
+    {
+      "name": "conflict_demotion_unverified_demotes_to_itself",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"},
+          {"tier": "interop", "ran": true, "passed": false, "author": {"identity": "reviewer-2", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"},
+          {"tier": "constructed_check", "ran": false, "passed": false, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": ""}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "interop",
+        "applied_rank_ops": ["unrun_declared_cap"],
+        "conflicting_evidence": true,
+        "failed_declared_evidence": true,
+        "counters": {"unverified_from_unrun_declared": 1, "degraded": 0, "failed_declared": 1}
+      }
+    },
+    {
+      "name": "staleness_reversion_fires_on_content_identity_change",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:b"
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": ["staleness_reversion"],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 1, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "staleness_unbindable_is_counted_not_exempted_silently",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": ""}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:b"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 1, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "unknown_grade_ranks_zero_below_unverified",
+      "input": {
+        "declared": [
+          {"tier": "certified", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "unverified",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "producer_mint_rejected_derived_governs",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a",
+        "producer_supplied_grade": "proof"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 1, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "unbindable_not_counted_at_unverified",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"},
+          {"tier": "review_only", "ran": false, "passed": false, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": ""}, "content_identity": ""}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": ""
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": ["unrun_declared_cap"],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 1, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "same_chain_indeterminate_below_cap_range",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": ""},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"same_chain_indeterminate": 0, "author_chain_unbound": 0}
+      }
+    },
+    {
+      "name": "all_unrun_base_already_unverified",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": false, "passed": false, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": ""}, "content_identity": ""},
+          {"tier": "constructed_check", "ran": false, "passed": false, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": ""}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": ""
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "unverified",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "agreeing_producer_mint_not_counted",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a",
+        "producer_supplied_grade": "constructed_check"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "counters": {"unverified_from_unrun_declared": 0, "degraded": 0, "producer_mint_rejected": 0, "unbindable_content_identity": 0, "same_chain_indeterminate": 0}
+      }
+    },
+    {
+      "name": "tied_top_tier_uncapped_member_wins_order_ab",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"},
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-9", "kind": "agent", "chain_id": "chain-2"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "interop",
+        "evidence_kind": "interop",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "oracle_author": {"identity": "agent-9", "kind": "agent", "chain_id": "chain-2"},
+        "counters": {"degraded": 0, "tied_uncap": 1}
+      }
+    },
+    {
+      "name": "tied_top_tier_uncapped_member_wins_order_ba",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-9", "kind": "agent", "chain_id": "chain-2"}, "content_identity": "sha:a"},
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "interop",
+        "evidence_kind": "interop",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "oracle_author": {"identity": "agent-9", "kind": "agent", "chain_id": "chain-2"},
+        "counters": {"degraded": 0, "tied_uncap": 1}
+      }
+    },
+    {
+      "name": "tied_top_tier_all_capped_folds_once",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-3", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"},
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "interop",
+        "applied_rank_ops": ["same_chain_cap"],
+        "conflicting_evidence": false,
+        "oracle_author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"},
+        "counters": {"degraded": 1, "tied_uncap": 0}
+      }
+    },
+    {
+      "name": "failed_declared_counted_and_flagged",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"},
+          {"tier": "interop", "ran": true, "passed": false, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "constructed_check",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "failed_declared_evidence": true,
+        "counters": {"failed_declared": 1, "degraded": 0}
+      }
+    },
+    {
+      "name": "passed_only_not_flagged_failed_declared",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": "chain-9"}, "content_identity": "sha:a"},
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:a"
+      },
+      "expect": {
+        "effective_grade": "interop",
+        "evidence_kind": "interop",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "failed_declared_evidence": false,
+        "counters": {"failed_declared": 0}
+      }
+    },
+    {
+      "name": "composed_ops_retained_in_application_order",
+      "input": {
+        "declared": [
+          {"tier": "interop", "ran": true, "passed": true, "author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"}, "runner": {"identity": "ci-executor-1", "kind": "kernel", "chain_id": "ci-chain-1"}, "content_identity": "sha:a"},
+          {"tier": "interop", "ran": true, "passed": false, "author": {"identity": "reviewer-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:a"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:b"
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "interop",
+        "applied_rank_ops": ["same_chain_cap", "conflict_demotion", "staleness_reversion"],
+        "conflicting_evidence": true,
+        "failed_declared_evidence": true,
+        "oracle_author": {"identity": "agent-2", "kind": "agent", "chain_id": "chain-1"},
+        "oracle_runner": {"identity": "ci-executor-1", "kind": "kernel", "chain_id": "ci-chain-1"},
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "counters": {"degraded": 3, "failed_declared": 1}
+      }
+    },
+    {
+      "name": "missing_admission_evidence_fails_closed",
+      "input": {
+        "admission_evidence": false,
+        "declared": [],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": ""
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "unverified",
+        "applied_rank_ops": [],
+        "conflicting_evidence": false,
+        "failed_declared_evidence": false,
+        "provenance": "missing_admission_fact",
+        "counters": {"degraded": 0, "unverified_from_unrun_declared": 0}
+      }
+    }
+  ]
+}

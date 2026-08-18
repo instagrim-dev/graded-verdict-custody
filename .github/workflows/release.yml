@@ -1,0 +1,30 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  self-graded-release:
+    runs-on: ubuntu-latest
+    permissions:
+      # gh release create needs write; every other scope stays at the
+      # workflow-level read default.
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Mint the release custody record (gates are the declared judge)
+        run: |
+          python3 scripts/build_release_custody_record.py \
+            --content-identity "${GITHUB_SHA}" \
+            --runner-identity "github-actions/${GITHUB_RUN_ID}"
+      - name: Publish release with custody record attached
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" release-custody-record.json \
+            --title "${GITHUB_REF_NAME}" \
+            --notes "Self-graded release. The attached verdict custody record states evidence strength for these artifacts, never correctness. See governance/GOVERNANCE.md."
