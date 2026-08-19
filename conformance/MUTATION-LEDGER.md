@@ -1,60 +1,49 @@
 # Conformance mutation ledger
 
-Each derivation rule is proven load-bearing by mutating the reference runner
-alone, observing the named fixture fail, and restoring to green. One
-mutation per rank operation. All runs executed 2026-08-18 against the
-13-case fixture set; restored baseline: `all 13 case(s) passed`.
+GENERATED FILE — regenerated from executed harness output by
+`python3 scripts/run_mutations.py --ledger`; do not edit by hand
+(CI re-derives it and fails on drift).
 
-| Rank operation | Mutation applied to the runner | Fixture that failed |
+Each derivation rule is proven load-bearing by executing
+`scripts/run_mutations.py`: every registered mutation is applied to a
+temporary copy of the reference runner, the suite is run, the harness
+asserts EXACTLY the named fixture(s) fail and nothing else, the
+original bytes are restored, and the suite is asserted green again.
+A mutation under which every case passes is a harness FAILURE
+(fail-closed), and that polarity is itself proven by
+`python3 scripts/run_mutations.py --self-test`, which pushes a
+deliberately vacuous mutation through the same loop and requires its
+rejection.
+
+Restored baseline after every row: `all 28 case(s) passed`.
+
+| Mutation | Rule under proof | Observed failing case(s) |
 | --- | --- | --- |
-| `same_chain_cap` (proof exemption) | removed the proof-exemption condition | `same_chain_cap_exempts_proof` |
-| `unrun_declared_cap` | disabled the cap branch | `unrun_declared_cap_fires` |
-| `conflict_demotion` | demotion returned the same tier | `conflict_demotion_fires_one_ordinal_tier` |
-| `staleness_reversion` | reversion condition forced false | `staleness_reversion_fires_on_content_identity_change` |
+| `proof_exemption_removed` | section 5 step 3.1: the kernel proof exemption is load-bearing | exactly `same_chain_cap_exempts_kernel_proof` |
+| `unrun_cap_disabled` | section 5 step 2: the unrun-declared cap is load-bearing | exactly `conflict_demotion_unverified_demotes_to_itself`, `unbindable_not_counted_at_unverified`, `unrun_declared_cap_fires` |
+| `conflict_demotion_returns_same_tier` | section 5 step 3.2: demotion moves one ordinal tier | exactly `composed_ops_retained_in_application_order`, `conflict_demotion_fires_one_ordinal_tier` |
+| `staleness_condition_forced_false` | section 5 step 3.3: staleness reversion is load-bearing | exactly `composed_ops_retained_in_application_order`, `relabel_evasion_staleness_still_fires`, `staleness_reversion_fires_on_content_identity_change` |
+| `mapping_targets_swapped` | section 9.2: a wrong (still injective/total) mapping fails its witness fixtures | exactly `same_chain_indeterminate_is_counted_not_assumed`, `staleness_unbindable_is_counted_not_exempted_silently` |
+| `mapping_folds_two_populations` | section 9.2: folding two canonical populations is non-conformance by rule | mapping validation failed loudly before any case ran (exit 2: `not injective`; `not total`) |
+| `tie_break_reverted_to_array_order` | section 5 tied-set MAX is order-independent (the twins exist because one order coincides with pre-repair behavior) | exactly `tied_top_tier_all_capped_folds_once`, `tied_top_tier_uncapped_member_wins_order_ab` |
+| `tied_uncap_increment_zeroed` | section 5/7: tied-uncap observability population is load-bearing | exactly `tied_top_tier_uncapped_member_wins_order_ab`, `tied_top_tier_uncapped_member_wins_order_ba` |
+| `failed_declared_increment_zeroed` | section 5: ran-and-failed declared oracles are counted per oracle | exactly `composed_ops_retained_in_application_order`, `conflict_demotion_fires_one_ordinal_tier`, `conflict_demotion_unverified_demotes_to_itself`, `failed_declared_counted_and_flagged` |
+| `failed_flag_hardcoded_true` | section 5: failed_declared_evidence flag polarity (not set when none failed) | exactly `passed_only_not_flagged_failed_declared` |
+| `kernel_kind_requirement_dropped` | section 5 step 3.1: the proof exemption requires kernel kind | exactly `agent_authored_proof_same_chain_capped` |
+| `proof_kernel_exempt_increment_zeroed` | section 7: kernel-kind proof exemptions are counted | exactly `same_chain_cap_exempts_kernel_proof` |
+| `cap_regated_on_agent_kind` | section 5 step 3.1: the same-chain cap is kind-free (pre-repair kind gating fails) | exactly `author_chain_unbound_counted_distinctly`, `human_author_same_chain_caps` |
+| `unbound_folded_into_indeterminate` | section 5 step 3.1: author-chain-unbound is distinct from same-chain-indeterminate | exactly `author_chain_unbound_counted_distinctly` |
+| `conflict_derivation_forced_false` | section 5 step 3.2: conflict is derived from the declared set, never caller-supplied | exactly `composed_ops_retained_in_application_order`, `conflict_demotion_fires_one_ordinal_tier`, `conflict_demotion_unverified_demotes_to_itself` |
+| `applied_ops_reversed` | section 5 step 4: applied rank operations are retained in application order | exactly `composed_ops_retained_in_application_order` |
+| `oracle_runner_triple_dropped` | section 3: custody role triples are carried on the record | exactly `composed_ops_retained_in_application_order`, `conflict_demotion_fires_one_ordinal_tier` |
+| `missing_admission_branch_disabled` | section 8: fail-closed admission is load-bearing | exactly `missing_admission_evidence_fails_closed` |
+| `base_derivation_min_instead_of_max` | section 5 step 1: the base grade is the rank-MAXIMUM over ran-and-passed tiers | exactly `passed_only_not_flagged_failed_declared` |
+| `producer_mint_admitted` | section 6: a producer-supplied grade is never admitted; the derived record governs | exactly `producer_mint_rejected_derived_governs` |
+| `unknown_grade_ranks_above_all` | section 2: a value outside the vocabulary ranks strictly below every member | exactly `unknown_grade_ranks_zero_below_unverified` |
+| `unbindable_increment_zeroed` | section 5 step 3.3 / section 7: unbindable content identity is counted, never silently exempted | exactly `staleness_unbindable_is_counted_not_exempted_silently` |
+| `indeterminate_increment_zeroed` | section 5 step 3.1 / section 7: same-chain-indeterminate is counted, never assumed | exactly `same_chain_indeterminate_is_counted_not_assumed` |
+| `degraded_increments_zeroed` | section 7: the degraded population counts each applied step-3 rank operation | exactly `agent_authored_proof_same_chain_capped`, `composed_ops_retained_in_application_order`, `conflict_demotion_fires_one_ordinal_tier`, `human_author_same_chain_caps`, `relabel_evasion_staleness_still_fires`, `same_chain_cap_fires_for_same_chain_agent_author`, `staleness_reversion_fires_on_content_identity_change`, `tied_top_tier_all_capped_folds_once` |
 
-Every mutation failed exactly one named case and the restore returned the
-full set to green, so each fixture discriminates its rule rather than
-passing vacuously.
-
-## 2026-08-18 — Keyed per-population comparison (spec §9.2)
-
-Runs executed against the 17-case fixture set after the runner moved from
-whole-structure counter equality to keyed per-canonical-population
-comparison with a declared local-spelling mapping. Restored baseline:
-`all 17 case(s) passed`.
-
-| Rule under proof | Mutation applied to the runner | Observed failure |
-| --- | --- | --- |
-| §9.2 wrong mapping fails a named fixture | swapped the mapping targets for `unbindable_content_identity` and `same_chain_indeterminate` (still injective/total) | exactly `same_chain_indeterminate_is_counted_not_assumed` and `staleness_unbindable_is_counted_not_exempted_silently` failed (the two solo-witness fixtures); exit 1 |
-| §9.2 fold is non-conformance by rule | mapped both local counters onto canonical `unbindable_content_identity` | mapping validation failed loudly before any case ran: `not injective` + `not total`; exit 2 |
-
-## 2026-08-18 — Derivation major: tied-set MAX, failed-declared visibility, kernel-gated proof exemption, chain-keyed cap, derived conflict, custody triples, fail-closed admission
-
-Runs executed against the 27-case fixture set; restored baseline after every
-row: `all 27 case(s) passed`. The pre-repair witness for order dependence
-(two tied top-tier passing oracles graded differently by JSON array order)
-now has order-swapped twin fixtures with byte-identical expectations; the
-pre-repair witness for the kind-gated cap escape (human author, matching
-chain, silently uncapped and uncounted) is `human_author_same_chain_caps`.
-Note: the former `same_chain_cap_exempts_proof` fixture was renamed
-`same_chain_cap_exempts_kernel_proof` with its author flipped to
-`kind: kernel`; agent-authored same-chain `proof` is now capped and has its
-own fixture.
-
-| Rule under proof | Mutation applied to the runner | Observed failing case(s) |
-| --- | --- | --- |
-| §5 tied-set MAX is order-independent | tie-break reverted to input-array order (sort removed) | `tied_top_tier_uncapped_member_wins_order_ab`, `tied_top_tier_all_capped_folds_once` — the swapped twin stays green because one order coincides with pre-repair behavior, which is exactly why the twins exist |
-| §5/§7 tied-uncap observability | `tied_uncap` increment zeroed | both order-swapped twins |
-| §5 failed-declared counted per oracle | `failed_declared` increment zeroed | `conflict_demotion_fires_one_ordinal_tier`, `conflict_demotion_unverified_demotes_to_itself`, `failed_declared_counted_and_flagged`, `composed_ops_retained_in_application_order` |
-| §5 flag polarity (not counted when none failed) | `failed_declared_evidence` hardcoded true | `passed_only_not_flagged_failed_declared` |
-| §5 step 3.1 proof exemption requires kernel kind | kernel-kind requirement dropped from the exemption | `agent_authored_proof_same_chain_capped` |
-| §7 kernel exemptions counted | `proof_kernel_exempt` increment zeroed | `same_chain_cap_exempts_kernel_proof` |
-| §5 step 3.1 cap is kind-free | cap re-gated on `kind: agent` (pre-repair behavior) | `same_chain_cap_exempts_kernel_proof`, `author_chain_unbound_counted_distinctly`, `human_author_same_chain_caps` |
-| §5 step 3.1 unbound is distinct from indeterminate | unbound folded into `same_chain_indeterminate` | `author_chain_unbound_counted_distinctly` |
-| §5 step 3.2 conflict derived, not caller-supplied | derivation forced to no-conflict | `conflict_demotion_fires_one_ordinal_tier`, `conflict_demotion_unverified_demotes_to_itself`, `composed_ops_retained_in_application_order` |
-| §5 step 4 ops retained in application order | `applied_rank_ops` reversed | `composed_ops_retained_in_application_order` |
-| §3 custody triples carried on the record | `oracle_runner` triple dropped | `conflict_demotion_fires_one_ordinal_tier`, `composed_ops_retained_in_application_order` |
-| §8 fail-closed admission | missing-admission branch disabled | `missing_admission_evidence_fails_closed` |
-
-Every mutation failed at least one named case, no mutation left the suite
-green, and each restore returned the full set to `all 27 case(s) passed`.
+Executed registry size: 24 mutation(s) over the 28-case fixture set. Every mutation failed exactly its
+registered fixture(s), no mutation left the suite green, and each
+restore returned the full set to green.

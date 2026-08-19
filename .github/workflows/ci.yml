@@ -23,3 +23,9 @@ jobs:
         run: python3 scripts/check_publication_boundary.py --self-test
       - name: Release builder red path (failing gate mints no record)
         run: python3 scripts/test_release_builder_red_path.py
+      - name: Mutation harness (every registered mutation kills exactly its fixtures)
+        run: python3 scripts/run_mutations.py
+      - name: Mutation harness polarity (vacuous mutation rejected fail-closed)
+        run: python3 scripts/run_mutations.py --self-test
+      - name: Mutation ledger freshness (ledger matches executed output)
+        run: python3 scripts/run_mutations.py --ledger --check
