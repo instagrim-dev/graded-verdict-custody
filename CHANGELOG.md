@@ -8,7 +8,15 @@ and this project adheres to
 `governance/GOVERNANCE.md` (vocabulary changes are major; new counted
 populations are minor; conformance claims are version-pinned).
 
-## [Unreleased]
+## [1.0.0] - 2026-08-18
+
+Initial public release: specification v1 (six-grade ladder, custody role
+triples, four rank operations with normative application order, declared-oracle
+resolution, admission, custody record, conformance program), canonical grade
+registration artifact, 28-case language-neutral fixture corpus with reference
+runner, executable mutation harness (24 registered mutations), publication
+boundary gate with polarity self-test, operator-discipline handbook, and
+governance with version-pinned conformance claims.
 
 ### Added
 
