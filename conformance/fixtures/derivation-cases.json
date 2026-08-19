@@ -471,6 +471,24 @@
       }
     },
     {
+      "name": "relabel_evasion_staleness_still_fires",
+      "comment": "Section 5 step 3.3 content-identity minimum properties: the producer relabeled (identity changed while claiming unchanged content). Comparison is over the whole identity value; no sub-region is a producer-writable label, so reversion fires.",
+      "input": {
+        "declared": [
+          {"tier": "constructed_check", "ran": true, "passed": true, "author": {"identity": "operator-1", "kind": "human", "chain_id": ""}, "content_identity": "sha:c0ffee+label-v1"}
+        ],
+        "work_producer": {"identity": "producer-1", "kind": "agent", "chain_id": "chain-1"},
+        "current_content_identity": "sha:c0ffee+label-v2"
+      },
+      "expect": {
+        "effective_grade": "unverified",
+        "evidence_kind": "constructed_check",
+        "applied_rank_ops": ["staleness_reversion"],
+        "conflicting_evidence": false,
+        "counters": {"degraded": 1, "unbindable_content_identity": 0}
+      }
+    },
+    {
       "name": "missing_admission_evidence_fails_closed",
       "input": {
         "admission_evidence": false,

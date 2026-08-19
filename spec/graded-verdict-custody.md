@@ -234,6 +234,21 @@ At terminalization, the effective grade MUST be derived as follows:
       grade at this step ranks above `unverified`. A record whose
       effective grade is already `unverified` has nothing left for
       staleness to protect and is not counted as unbindable.
+
+      **Content-identity minimum properties.** A judged-content identity
+      MUST be deterministic within a conformer: the same judged content
+      yields the same identity every time one implementation derives it.
+      The identity MUST be derived from the judged content itself; a work
+      producer MUST NOT be able to assign or alter an identity
+      independently of the content — a producer-choosable identity makes
+      this reversion evadable by relabeling, in both directions (keep the
+      old identity across a real content change, or present a changed
+      identity as a mere label change). Identity comparison is over the
+      whole identity value: no sub-region of an identity is a
+      producer-writable label exempt from comparison, so a changed
+      identity over unchanged content still reverts. (For example, a
+      cryptographic digest of the judged artifact satisfies both
+      properties; a producer-assigned version label satisfies neither.)
 4. Every applied rank operation MUST be retained on the record, in
    application order.
 
@@ -271,6 +286,13 @@ The `failed_declared`, `proof_kernel_exempt`, `author_chain_unbound`, and
 `tied_uncap` populations are observability populations, not degradations:
 none of them accompanies a grade change by itself, and none is ever
 counted in `degraded`.
+
+Counted populations exist to be read. A conformer MUST surface at least
+one counted population on the custody record itself or on an enumerable
+surface a consumer can read without privileged access to the
+implementation's internals — a counted population no consumer can possibly
+observe is a dead sensor, and keeping every count write-only does not
+conform.
 
 ## 8. Fail-closed admission
 
